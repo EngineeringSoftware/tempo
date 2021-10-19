@@ -1,0 +1,11 @@
+#include <stdio.h>
+int x = 0;
+int f0() {
+    x++;
+    return x;
+}
+FUNCTION_HERE
+int main() {
+    f1();
+    printf("%d\n", x);
+}

@@ -1,0 +1,15 @@
+#include <stdio.h>
+#include <type_traits>
+
+template <typename T>
+__device__ auto dummy_fn(T t) {
+CODE HERE
+}
+
+__global__ void test_kernel() {
+MAIN HERE
+}
+int main() {
+    test_kernel<<<1,1>>>();
+    cudaDeviceSynchronize();
+}

@@ -1,0 +1,12 @@
+#include <stdio.h>
+__device__ int x = 0;
+__global__ void test_kernel() {
+ASSIGNMENT HERE
+}
+int main() {
+    test_kernel<<<1,1>>>();
+    cudaDeviceSynchronize();
+    int y;
+    cudaMemcpyFromSymbol(&y, x, sizeof(int), 0, cudaMemcpyDeviceToHost);
+    printf("%d\n", y);
+}

@@ -1,0 +1,172 @@
+#ifndef PTR_H
+#define PTR_H
+
+#include <stdint.h>
+#include "../objpool.h"
+
+/* max children per node */
+#define MAX_CHILDREN 20
+
+typedef struct _ptrnode {
+    int32_t num_of_children;
+    int8_t id;
+    struct _ptrnode *children[MAX_CHILDREN];
+    int8_t edge_type[MAX_CHILDREN];
+} Node;
+
+DefObjPool(Node);
+
+/* ---------------------------------------- */
+
+typedef struct _pg_env {
+    /* intended size of the graph */
+    int32_t num_of_nodes;
+    /* object pool */
+    NodePool *op;
+} Env;
+
+/* ---------------------------------------- */
+
+typedef struct _ptrgraph {
+    Node *root;
+} PG;
+
+/*
+ * Generates PGs for the given environment.
+ */
+__device__ void pgGenerate(Env*);
+__device__ void pgPrint(PG*, char []);
+
+/* ---------------------------------------- */
+
+#define MAX_LL_SIZE 20
+
+typedef struct _linkedlistnode {
+    Node *value;
+} LLNode;
+
+typedef struct _linkedlist {
+    int32_t size;
+    int32_t first_index;
+    int32_t last_index;
+    LLNode nodes[MAX_LL_SIZE];
+} LinkedList;
+
+__device__ void llInit(LinkedList *ll);
+__device__ void llAdd(LinkedList *ll, Node *n);
+__device__ int8_t llRemove(LinkedList *ll, Node *n);
+__device__ Node* llRemoveFirst(LinkedList *ll);
+__device__ Node* llRemoveLast(LinkedList *ll);
+__device__ int8_t llContains(LinkedList *ll, Node *n);
+
+/* ---------------------------------------- */
+
+typedef struct _set {
+    LinkedList *ll;
+} Set;
+
+__device__ void setInit(Set *s, LinkedList *ll);
+__device__ int32_t setSize(Set *s);
+__device__ void setAdd(Set *s, Node *n);
+__device__ void setRemove(Set *s, Node *n);
+__device__ int8_t setContains(Set *s, Node *n);
+
+__device__ void llInit(LinkedList *ll) {
+    ll->size = 0;
+    ll->first_index = 0;
+    ll->last_index = 0;
+}
+
+__device__ void llAdd(LinkedList *ll, Node *n) {
+    if (ll->last_index + 1 >= MAX_LL_SIZE) {
+        printf("ERROR: max linked list size limit reached\n");
+        asm("exit;");
+    }
+
+    ll->nodes[ll->last_index].value = n;
+    ll->last_index++;
+    ll->size++;
+}
+
+__device__ int8_t llRemove(LinkedList *ll, Node *n) {
+    if (ll->size == 0) {
+        return FALSE;
+    }
+
+    for (int32_t i = ll->first_index; i < ll->last_index; i++) {
+        if (ll->nodes[i].value == n) {
+            for (int32_t j = i; j < ll->last_index; j++) {
+                ll->nodes[j].value = ll->nodes[j + 1].value;
+            }
+            ll->last_index--;
+            ll->size--;
+
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+__device__ Node* llRemoveFirst(LinkedList *ll) {
+    if (ll->size == 0) {
+        return NULL;
+    }
+
+    Node *result = ll->nodes[ll->first_index++].value;
+    ll->size--;
+
+    return result;
+}
+
+__device__ Node* llRemoveLast(LinkedList *ll) {
+    assert(ll->size > 0);
+
+    ll->last_index--;
+    Node *result = ll->nodes[ll->last_index].value;
+    ll->size--;
+
+    return result;
+}
+
+__device__ int8_t llContains(LinkedList *ll, Node *n) {
+    assert(ll != NULL);
+    for (int32_t i = ll->first_index; i < ll->last_index; i++) {
+        if (ll->nodes[i].value == n) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+/* ---------------------------------------- */
+
+__device__ int32_t setSize(Set *s) {
+    return s->ll->size;
+}
+
+__device__ void setInit(Set *s, LinkedList *ll) {
+    llInit(ll);
+    s->ll = ll;
+}
+
+__device__ void setAdd(Set *s, Node *n) {
+    assert(s != NULL);
+    assert(s->ll != NULL);
+
+    if (!setContains(s, n)) {
+        llAdd(s->ll, n);
+    }
+}
+
+__device__ void setRemove(Set *s, Node *n) {
+    llRemove(s->ll, n);
+}
+
+__device__ int8_t setContains(Set *s, Node *n) {
+    assert(s != NULL);
+    assert(s->ll != NULL);
+    return llContains(s->ll, n);
+}
+
+#endif

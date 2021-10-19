@@ -1,0 +1,6 @@
+#include <stdio.h>
+
+CLS HERE
+
+int main() {
+}

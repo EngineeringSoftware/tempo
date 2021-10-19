@@ -1,0 +1,8 @@
+#include <stdio.h>
+
+__global__ void test_kernel() {
+}
+int main() {
+    test_kernel<<<B,T>>>();
+    cudaDeviceSynchronize();
+}

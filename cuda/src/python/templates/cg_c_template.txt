@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include "functions.h"
+void CGInit(CG *cg, Node *node_pool, const char *adj_matrix, int cg_size) {
+    // iterate over all nodes
+    for (int i = 0; i < cg_size; i++) {
+        Node *node = &node_pool[i];
+        node->function_id = i;
+        node->num_of_children = 0;
+
+        int children_index = 0;
+        int offset = i * cg_size;
+
+        // iterate over children
+        for (int j = 0; j < cg_size; j++) {
+            int num_calls = adj_matrix[j + offset] - '0';
+            node->num_of_children += num_calls;
+
+            for (int z = 0; z < num_calls; z++) {
+                node->children[children_index++] = &node_pool[j];
+            }
+        }
+    }
+
+    cg->root = &node_pool[0];
+}
+void test() {
+}
+int main() {
+    test();
+}

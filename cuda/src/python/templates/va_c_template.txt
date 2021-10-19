@@ -1,0 +1,7 @@
+#include <stdio.h>
+
+int x = 0;
+int main() {
+ASSIGNMENT HERE
+    printf("%d\n", x);
+}

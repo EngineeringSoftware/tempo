@@ -1,0 +1,11 @@
+#include <stdio.h>
+#include <type_traits>
+
+template <typename T>
+auto dummy_fn(T t) {
+CODE HERE
+}
+
+int main() {
+MAIN HERE
+}
