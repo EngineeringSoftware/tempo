@@ -55,6 +55,7 @@ __global__ void avltSeqGPU(const int32_t bck_active, const int32_t n, const int3
 
     // use input (generated above) to test something
     // e.g., tm.put(tid, new_object);
+}
 ```
 
 Unlike "normal" CUDA kernels, kernels for Tempo are (automatically)
